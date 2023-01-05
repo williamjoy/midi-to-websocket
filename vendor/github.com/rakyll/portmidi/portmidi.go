@@ -16,7 +16,7 @@
 package portmidi
 
 // #cgo CFLAGS:  -I/usr/local/include
-// #cgo LDFLAGS: -lportmidi -L/usr/local/lib
+// #cgo arm64 LDFLAGS: -lportmidi -L/opt/homebrew/lib
 //
 // #include <stdlib.h>
 // #include <portmidi.h>

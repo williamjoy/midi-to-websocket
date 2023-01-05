@@ -2,41 +2,53 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gorilla/websocket"
 	"github.com/rakyll/portmidi"
 )
 
-var deviceIDFlag = flag.Int("deviceid", 3, "MIDI Device ID")
+var (
+	deviceIDFlag      = flag.Int("deviceid", 3, "MIDI Device ID")
+	httpListenAddress = flag.String("webSocketAddress", "0.0.0.0:8080", "WebSocket Listen Address")
+)
 
 func main() {
 	flag.Parse()
 
 	// midi
 	deviceID := portmidi.DeviceID(*deviceIDFlag)
-	fmt.Println(portmidi.Info(deviceID))
+	deviceInfo := portmidi.Info(deviceID)
+	if deviceInfo == nil {
+		for i := 0; i < portmidi.CountDevices(); i++ {
+			deviceInfo = portmidi.Info(portmidi.DeviceID(i))
+			log.Printf("DeviceID <%d>, info is <%+v>\n", i, deviceInfo)
+		}
+		log.Fatal("Device not exists for id=", deviceID)
+		os.Exit(-2)
+	}
 
+	log.Printf("DeviceID is <%d>, info is <%+v>\n", deviceID, deviceInfo)
 	in, err := portmidi.NewInputStream(deviceID, 1024)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer in.Close()
 
-	midiEvent := in.Listen()
+	midiEvents := in.Listen()
 
 	clients := map[int64]*websocket.Conn{}
 
 	go func() {
 		for {
 			select {
-			case event := <-midiEvent:
-				log.Printf("write midi: %+v\n", event)
+			case events := <-midiEvents:
+				log.Printf("write midi: %+v\n", events)
 				for _, client := range clients {
-					err := client.WriteJSON(event)
+					err := client.WriteJSON(events)
 					if err != nil {
 						log.Fatal(err)
 					}
@@ -74,5 +86,5 @@ func main() {
 		}
 	})
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(*httpListenAddress, nil))
 }

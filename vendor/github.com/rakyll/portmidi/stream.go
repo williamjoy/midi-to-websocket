@@ -239,23 +239,21 @@ func (s *Stream) ReadSysExBytes(max int) ([]byte, error) {
 }
 
 // Listen input stream for MIDI events.
-func (s *Stream) Listen() <-chan Event {
-	ch := make(chan Event)
-	go func(s *Stream, ch chan Event) {
+func (s *Stream) Listen() <-chan []Event {
+	ch := make(chan []Event)
+	go func(s *Stream, ch chan []Event) {
 		for {
 			// sleep for a while before the new polling tick,
 			// otherwise operation is too intensive and blocking
-			time.Sleep(10 * time.Millisecond)
+			time.Sleep(12 * time.Millisecond)
 			events, err := s.Read(maxEventBufferSize)
 			// Note: It's not very reasonable to push sliced data into
 			// a channel, several perf penalities there are.
 			// This function is added as a handy utility.
-			if err != nil {
+			if err != nil || len(events) == 0 {
 				continue
 			}
-			for i := range events {
-				ch <- events[i]
-			}
+			ch <- events
 		}
 	}(s, ch)
 	return ch
