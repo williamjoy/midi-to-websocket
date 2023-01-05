@@ -1,0 +1,4 @@
+github.com/gorilla/websocket v1.5.0 h1:PPwGk2jz7EePpoHN/+ClbZu8SPxiqlu12wZP/3sWmnc=
+github.com/gorilla/websocket v1.5.0/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
+github.com/rakyll/portmidi v0.0.0-20201020180702-d436ceaa537a h1:+qeh9b4LlO8AYVvm+TG4OXDRwBynTLk82t0HDBBBOQ8=
+github.com/rakyll/portmidi v0.0.0-20201020180702-d436ceaa537a/go.mod h1:xKffaBd7e1YUoLpR2azvJqkxEdUDNGNDMlsUNdv6Bcs=
