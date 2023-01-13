@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"log"
 	"net/http"
@@ -46,9 +47,14 @@ func main() {
 		for {
 			select {
 			case events := <-midiEvents:
-				log.Printf("write midi: %+v\n", events)
+				jsonPayload, err := json.Marshal(events)
+				if err != nil {
+					log.Fatal(err)
+					continue
+				}
+				log.Printf("write midi: %+s\n", jsonPayload)
 				for _, client := range clients {
-					err := client.WriteJSON(events)
+					err := client.WriteMessage(websocket.TextMessage, jsonPayload)
 					if err != nil {
 						log.Fatal(err)
 					}
